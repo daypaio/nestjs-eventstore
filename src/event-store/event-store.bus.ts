@@ -16,18 +16,23 @@ export interface IEventConstructors {
   [key: string]: (...args: any[]) => IEvent;
 }
 
+interface ExtendedCatchUpSubscription extends EventStoreCatchUpSubscription {
+  isLive: boolean | undefined;
+}
+
 export class EventStoreBus {
   private eventHandlers: IEventConstructors;
   private logger = new Logger('EventStoreBus');
+  private catchupSubscriptions: ExtendedCatchUpSubscription[] = [];
 
   constructor(
     private eventStore: EventStore,
     private subject$: Subject<IEvent>,
-    private config: EventStoreBusConfig,
+    config: EventStoreBusConfig,
   ) {
     this.addEventHandlers(config.eventInstantiators);
 
-    this.config.subscriptions.forEach((subscription) => {
+    for (const subscription of config.subscriptions) {
       if (subscription.type === EventStoreSubscriptionType.Persistent) {
         this.subscribeToPersistentSubscription(
           subscription.stream,
@@ -35,10 +40,14 @@ export class EventStoreBus {
         );
       }
       if (subscription.type === EventStoreSubscriptionType.CatchUp) {
-        this.subscribeToCatchupSubscription(subscription.stream);
+        this.catchupSubscriptions.push(this.subscribeToCatchupSubscription(subscription.stream));
       }
-    });
+    }
 
+  }
+
+  get allCatchUpSubscriptionsLive(): boolean {
+    return this.catchupSubscriptions.every(subscription => subscription.isLive);
   }
 
   async publish(event: IEvent, stream?: string) {
@@ -56,30 +65,33 @@ export class EventStoreBus {
     }
   }
 
-  async subscribeToCatchupSubscription(stream: string) {
+  subscribeToCatchupSubscription(stream: string): ExtendedCatchUpSubscription {
     this.logger.log(`Catching up and subscribing to stream ${stream}!`);
     try {
-      this.eventStore.connection.subscribeToStreamFrom(
+      const subscription = this.eventStore.connection.subscribeToStreamFrom(
         stream,
         0,
         true,
         (sub, payload) => this.onEvent(sub, payload),
-        () => this.onLiveProcessingStarted(),
+        () => this.onLiveProcessingStarted(subscription),
         (sub, reason, error) => this.onDropped(sub, reason, error),
-      );
+      ) as ExtendedCatchUpSubscription;
+
+      return subscription;
     } catch (err) {
       this.logger.error(err.message);
     }
   }
 
-  async subscribeToPersistentSubscription(stream: string, subscriptionName: string) {
+  async subscribeToPersistentSubscription(
+    stream: string,
+    subscriptionName: string,
+  ): Promise<EventStorePersistentSubscription> {
     try {
       this.logger.log(`
-      Connecting to persistent
-      subscription ${subscriptionName}
-      on stream ${stream}!
+      Connecting to persistent subscription ${subscriptionName} on stream ${stream}!
       `);
-      await this.eventStore.connection.connectToPersistentSubscription(
+      return await this.eventStore.connection.connectToPersistentSubscription(
         stream,
         subscriptionName,
         (sub, payload) => this.onEvent(sub, payload),
@@ -108,7 +120,8 @@ export class EventStoreBus {
     this.logger.error(error);
   }
 
-  onLiveProcessingStarted() {
+  onLiveProcessingStarted(subscription: ExtendedCatchUpSubscription) {
+    subscription.isLive = true;
     this.logger.log('Live processing of EventStore events started!');
   }
 

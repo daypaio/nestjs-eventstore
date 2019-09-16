@@ -20,29 +20,29 @@ export enum EventStoreSubscriptionType {
   CatchUp,
 }
 
-export interface EventStorePersistentSubscription {
-  type: EventStoreSubscriptionType.Persistent;
-  stream: string;
-  persistentSubscriptionName: string;
-}
+export type EventStorePersistentSubscription = {
+  type: EventStoreSubscriptionType.Persistent,
+  stream: string,
+  persistentSubscriptionName: string,
+};
 
-export interface EventStoreCatchupSubscription {
-  type: EventStoreSubscriptionType.CatchUp;
-  stream: string;
-}
+export type EventStoreCatchupSubscription = {
+  type: EventStoreSubscriptionType.CatchUp,
+  stream: string,
+};
 
-export interface EventStoreSubscriptionConfig {
-  persistentSubscriptionName: string;
-}
+export type EventStoreSubscriptionConfig = {
+  persistentSubscriptionName: string,
+};
 
 export type EventStoreSubscription =
   EventStorePersistentSubscription | EventStoreCatchupSubscription;
 
-export interface EventStoreBusConfig {
-  subscriptions: EventStoreSubscription[];
-  eventInstantiators: IEventConstructors;
-  eventHandlers: EventHandlerType[];
-}
+export type EventStoreBusConfig = {
+  subscriptions: EventStoreSubscription[],
+  eventInstantiators: IEventConstructors,
+  eventHandlers: EventHandlerType[],
+};
 
 export type EventHandlerType = Type<IEventHandler<IEvent>>;
 
