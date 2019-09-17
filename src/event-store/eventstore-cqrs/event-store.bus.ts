@@ -107,8 +107,16 @@ export class EventStoreBus {
     payload: ResolvedEvent,
   ) {
     const { event } = payload;
+    if (!payload.isResolved || !event || !event.isJson) {
+      this.logger.error('Received event that could not be resolved!');
+      return;
+    }
+    const handler = this.eventHandlers[event.eventType];
+    if (!handler) {
+      this.logger.error('Received event that could not be handled!');
+      return;
+    }
     const data = Object.values(JSON.parse(event.data.toString()));
-    this.logger.log(data);
     this.subject$.next(this.eventHandlers[event.eventType](...data));
   }
 
