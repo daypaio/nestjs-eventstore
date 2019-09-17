@@ -9,7 +9,7 @@ import {
 } from 'node-eventstore-client';
 import { v4 } from 'uuid';
 import { Logger } from '@nestjs/common';
-import { EventStore } from './event-store.class';
+import { EventStore } from '../event-store.class';
 import { EventStoreBusConfig, EventStoreSubscriptionType } from './event-bus.provider';
 
 export interface IEventConstructors {

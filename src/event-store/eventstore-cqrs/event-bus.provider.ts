@@ -13,7 +13,9 @@ import {
 } from '@nestjs/cqrs';
 import { SAGA_METADATA, EVENTS_HANDLER_METADATA } from '@nestjs/cqrs/dist/decorators/constants';
 import { EventStoreBus, IEventConstructors } from './event-store.bus';
-import { EventStore } from './event-store.class';
+import { EventStore } from '../event-store.class';
+import { ExplorerService } from '@nestjs/cqrs/dist/services/explorer.service';
+import { CqrsOptions } from '@nestjs/cqrs/dist/interfaces/cqrs-options.interface';
 
 export enum EventStoreSubscriptionType {
   Persistent,
@@ -41,7 +43,6 @@ export type EventStoreSubscription =
 export type EventStoreBusConfig = {
   subscriptions: EventStoreSubscription[],
   eventInstantiators: IEventConstructors,
-  eventHandlers: EventHandlerType[],
 };
 
 export type EventHandlerType = Type<IEventHandler<IEvent>>;
@@ -51,6 +52,7 @@ export class EventBusProvider extends ObservableBus<IEvent>
   implements OnModuleDestroy {
   private _publisher: EventStoreBus;
   private readonly subscriptions: Subscription[];
+  private readonly cqrsOptions: CqrsOptions;
 
   constructor(
     private readonly commandBus: CommandBus,
@@ -61,7 +63,6 @@ export class EventBusProvider extends ObservableBus<IEvent>
     super();
     this.subscriptions = [];
     this.useDefaultPublisher();
-    this.register(config.eventHandlers);
   }
 
   get publisher(): EventStoreBus {
