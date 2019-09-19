@@ -14,7 +14,6 @@ import {
 import { SAGA_METADATA, EVENTS_HANDLER_METADATA } from '@nestjs/cqrs/dist/decorators/constants';
 import { EventStoreBus, IEventConstructors } from './event-store.bus';
 import { EventStore } from '../event-store.class';
-import { ExplorerService } from '@nestjs/cqrs/dist/services/explorer.service';
 import { CqrsOptions } from '@nestjs/cqrs/dist/interfaces/cqrs-options.interface';
 
 export enum EventStoreSubscriptionType {
