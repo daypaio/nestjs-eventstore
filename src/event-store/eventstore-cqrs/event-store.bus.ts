@@ -33,7 +33,10 @@ export class EventStoreBus {
   private eventHandlers: IEventConstructors;
   private logger = new Logger('EventStoreBus');
   private catchupSubscriptions: ExtendedCatchUpSubscription[] = [];
+  private catchupSubscriptionsCount: number;
+
   private persistentSubscriptions: ExtendedPersistentSubscription[] = [];
+  private persistentSubscriptionsCount: number;
 
   constructor(
     private eventStore: EventStore,
@@ -57,6 +60,7 @@ export class EventStoreBus {
   }
 
   async subscribeToPersistentSubscriptions(subscriptions: ESPersistentSubscription[]) {
+    this.persistentSubscriptionsCount = subscriptions.length;
     this.persistentSubscriptions = await Promise.all(subscriptions.map(async (subscription) => {
       return await this.subscribeToPersistentSubscription(
         subscription.stream,
@@ -66,17 +70,24 @@ export class EventStoreBus {
   }
 
   subscribeToCatchUpSubscriptions(subscriptions: ESCatchUpSubscription[]) {
+    this.catchupSubscriptionsCount = subscriptions.length;
     this.catchupSubscriptions = subscriptions.map((subscription) => {
       return this.subscribeToCatchupSubscription(subscription.stream);
     });
   }
 
   get allCatchUpSubscriptionsLive(): boolean {
-    return this.catchupSubscriptions.every(subscription => subscription.isLive);
+    const initialized = this.catchupSubscriptions.length === this.catchupSubscriptionsCount;
+    return initialized && this.catchupSubscriptions.every((subscription) => {
+      return !!subscription && subscription.isLive;
+    });
   }
 
   get allPersistentSubscriptionsLive(): boolean {
-    return this.persistentSubscriptions.every(subscription => subscription.isLive);
+    const initialized = this.persistentSubscriptions.length === this.persistentSubscriptionsCount;
+    return initialized && this.persistentSubscriptions.every((subscription) => {
+      return !!subscription && subscription.isLive;
+    });
   }
 
   get isLive(): boolean {
