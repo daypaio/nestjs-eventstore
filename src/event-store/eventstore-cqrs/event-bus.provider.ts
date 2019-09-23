@@ -13,36 +13,36 @@ import {
 } from '@nestjs/cqrs';
 import { SAGA_METADATA, EVENTS_HANDLER_METADATA } from '@nestjs/cqrs/dist/decorators/constants';
 import { EventStoreBus, IEventConstructors } from './event-store.bus';
-import { EventStore } from './event-store.class';
+import { EventStore } from '../event-store.class';
+import { CqrsOptions } from '@nestjs/cqrs/dist/interfaces/cqrs-options.interface';
 
 export enum EventStoreSubscriptionType {
   Persistent,
   CatchUp,
 }
 
-export interface EventStorePersistentSubscription {
-  type: EventStoreSubscriptionType.Persistent;
-  stream: string;
-  persistentSubscriptionName: string;
-}
+export type EventStorePersistentSubscription = {
+  type: EventStoreSubscriptionType.Persistent,
+  stream: string,
+  persistentSubscriptionName: string,
+};
 
-export interface EventStoreCatchupSubscription {
-  type: EventStoreSubscriptionType.CatchUp;
-  stream: string;
-}
+export type EventStoreCatchupSubscription = {
+  type: EventStoreSubscriptionType.CatchUp,
+  stream: string,
+};
 
-export interface EventStoreSubscriptionConfig {
-  persistentSubscriptionName: string;
-}
+export type EventStoreSubscriptionConfig = {
+  persistentSubscriptionName: string,
+};
 
 export type EventStoreSubscription =
   EventStorePersistentSubscription | EventStoreCatchupSubscription;
 
-export interface EventStoreBusConfig {
-  subscriptions: EventStoreSubscription[];
-  eventInstantiators: IEventConstructors;
-  eventHandlers: EventHandlerType[];
-}
+export type EventStoreBusConfig = {
+  subscriptions: EventStoreSubscription[],
+  eventInstantiators: IEventConstructors,
+};
 
 export type EventHandlerType = Type<IEventHandler<IEvent>>;
 
@@ -51,6 +51,7 @@ export class EventBusProvider extends ObservableBus<IEvent>
   implements OnModuleDestroy {
   private _publisher: EventStoreBus;
   private readonly subscriptions: Subscription[];
+  private readonly cqrsOptions: CqrsOptions;
 
   constructor(
     private readonly commandBus: CommandBus,
@@ -61,7 +62,6 @@ export class EventBusProvider extends ObservableBus<IEvent>
     super();
     this.subscriptions = [];
     this.useDefaultPublisher();
-    this.register(config.eventHandlers);
   }
 
   get publisher(): EventStoreBus {
