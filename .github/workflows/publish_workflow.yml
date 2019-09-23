@@ -1,5 +1,4 @@
-name: Publish Workflow
-# This workflow is triggered on pushes to the repository.
+name: publish
 on:
   push:
     branches:    
@@ -29,7 +28,6 @@ jobs:
   publish:
     name: publish
     runs-on: ubuntu-latest
-    steps:
     steps:
     - needs: [lint, build]
     - uses: actions/checkout@v1
