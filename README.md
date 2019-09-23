@@ -1,6 +1,10 @@
 # nestjs-eventstore
 ---
 
+<p align="left">
+  <a href="https://github.com/daypaio/nestjs-eventstore"><img alt="GitHub Actions status" src="https://github.com/actions/setup-node/workflows/Main%20workflow/badge.svg"></a>
+</p>
+
 ## Description
 Injects eventstore connector modules, components, bus and eventstore config into a nestjs application.
 

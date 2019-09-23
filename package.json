@@ -1,7 +1,7 @@
 {
   "name": "nestjs-eventstore",
   "version": "1.4.4",
-  "description": "NestJS npm package starter",
+  "description": "Event Store connector for Nest js",
   "author": "Taimoor Alam <taimoor.alam@daypaio.com>",
   "license": "MIT",
   "readmeFilename": "README.md",
@@ -30,9 +30,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/nestjsplus/nestjs-package-starter"
+    "url": "https://github.com/daypaio/nestjs-eventstore"
   },
-  "bugs": "https://github.com/nestjsplus/nestjs-package-starter",
+  "bugs": "https://github.com/daypaio/nestjs-eventstore/issues",
   "peerDependencies": {
     "@nestjs/common": "^6.0.0",
     "@nestjs/core": "^6.0.0",
