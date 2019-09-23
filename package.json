@@ -1,6 +1,6 @@
 {
   "name": "nestjs-eventstore",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "NestJS npm package starter",
   "author": "Taimoor Alam <taimoor.alam@daypaio.com>",
   "license": "MIT",
