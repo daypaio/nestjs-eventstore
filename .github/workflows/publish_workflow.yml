@@ -1,5 +1,4 @@
-name: Publish Workflow
-# This workflow is triggered on pushes to the repository.
+name: publish
 on:
   push:
     branches:    
