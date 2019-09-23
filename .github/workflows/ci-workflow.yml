@@ -1,10 +1,11 @@
 name: Greet Everyone
 # This workflow is triggered on pushes to the repository.
-on: [push]
-  branches:
-    - master
-  tags:
-    - v1
+on: 
+  push
+    branches:
+      - master
+    tags:
+      - v1
 
 jobs:
   build:
