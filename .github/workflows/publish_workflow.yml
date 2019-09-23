@@ -30,7 +30,6 @@ jobs:
     name: publish
     runs-on: ubuntu-latest
     steps:
-    steps:
     - needs: [lint, build]
     - uses: actions/checkout@v1
     - uses: actions/setup-node@v1
