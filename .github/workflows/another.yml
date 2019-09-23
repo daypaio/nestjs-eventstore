@@ -1,6 +1,7 @@
 name: Greet Everyone
 # This workflow is triggered on pushes to the repository.
-on: [push]
+on:
+  push:
 
 jobs:
   build:
@@ -10,4 +11,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Hello world
-      run: echo 'Hello world the 32nd time'
+      run: echo 'Hello world the 33rd time'
