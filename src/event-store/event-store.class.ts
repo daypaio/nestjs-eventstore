@@ -7,14 +7,16 @@ import {
 import { Logger } from '@nestjs/common';
 
 export class EventStore {
-
   connection: EventStoreNodeConnection;
 
   isConnected: boolean = false;
 
   private logger: Logger = new Logger(this.constructor.name);
 
-  constructor(private settings: ConnectionSettings, private endpoint: TcpEndPoint) {
+  constructor(
+    private settings: ConnectionSettings,
+    private endpoint: TcpEndPoint,
+  ) {
     this.connect();
   }
 

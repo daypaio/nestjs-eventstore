@@ -25,7 +25,8 @@ interface ExtendedCatchUpSubscription extends EventStoreCatchUpSubscription {
   isLive: boolean | undefined;
 }
 
-interface ExtendedPersistentSubscription extends EventStorePersistentSubscription {
+interface ExtendedPersistentSubscription
+  extends EventStorePersistentSubscription {
   isLive: boolean | undefined;
 }
 
@@ -53,20 +54,27 @@ export class EventStoreBus {
       return sub.type === EventStoreSubscriptionType.Persistent;
     });
 
-    this.subscribeToCatchUpSubscriptions(catchupSubscriptions as ESCatchUpSubscription[]);
+    this.subscribeToCatchUpSubscriptions(
+      catchupSubscriptions as ESCatchUpSubscription[],
+    );
 
-    this.subscribeToPersistentSubscriptions(persistentSubscriptions as ESPersistentSubscription[]);
-
+    this.subscribeToPersistentSubscriptions(
+      persistentSubscriptions as ESPersistentSubscription[],
+    );
   }
 
-  async subscribeToPersistentSubscriptions(subscriptions: ESPersistentSubscription[]) {
+  async subscribeToPersistentSubscriptions(
+    subscriptions: ESPersistentSubscription[],
+  ) {
     this.persistentSubscriptionsCount = subscriptions.length;
-    this.persistentSubscriptions = await Promise.all(subscriptions.map(async (subscription) => {
-      return await this.subscribeToPersistentSubscription(
-        subscription.stream,
-        subscription.persistentSubscriptionName,
-      );
-    }));
+    this.persistentSubscriptions = await Promise.all(
+      subscriptions.map(async (subscription) => {
+        return await this.subscribeToPersistentSubscription(
+          subscription.stream,
+          subscription.persistentSubscriptionName,
+        );
+      }),
+    );
   }
 
   subscribeToCatchUpSubscriptions(subscriptions: ESCatchUpSubscription[]) {
@@ -77,21 +85,31 @@ export class EventStoreBus {
   }
 
   get allCatchUpSubscriptionsLive(): boolean {
-    const initialized = this.catchupSubscriptions.length === this.catchupSubscriptionsCount;
-    return initialized && this.catchupSubscriptions.every((subscription) => {
-      return !!subscription && subscription.isLive;
-    });
+    const initialized =
+      this.catchupSubscriptions.length === this.catchupSubscriptionsCount;
+    return (
+      initialized &&
+      this.catchupSubscriptions.every((subscription) => {
+        return !!subscription && subscription.isLive;
+      })
+    );
   }
 
   get allPersistentSubscriptionsLive(): boolean {
-    const initialized = this.persistentSubscriptions.length === this.persistentSubscriptionsCount;
-    return initialized && this.persistentSubscriptions.every((subscription) => {
-      return !!subscription && subscription.isLive;
-    });
+    const initialized =
+      this.persistentSubscriptions.length === this.persistentSubscriptionsCount;
+    return (
+      initialized &&
+      this.persistentSubscriptions.every((subscription) => {
+        return !!subscription && subscription.isLive;
+      })
+    );
   }
 
   get isLive(): boolean {
-    return this.allCatchUpSubscriptionsLive && this.allPersistentSubscriptionsLive;
+    return (
+      this.allCatchUpSubscriptionsLive && this.allPersistentSubscriptionsLive
+    );
   }
 
   async publish(event: IEvent, stream?: string) {
@@ -117,8 +135,12 @@ export class EventStoreBus {
         0,
         true,
         (sub, payload) => this.onEvent(sub, payload),
-        subscription => this.onLiveProcessingStarted(subscription as ExtendedCatchUpSubscription),
-        (sub, reason, error) => this.onDropped(sub as ExtendedCatchUpSubscription, reason, error),
+        subscription =>
+          this.onLiveProcessingStarted(
+            subscription as ExtendedCatchUpSubscription,
+          ),
+        (sub, reason, error) =>
+          this.onDropped(sub as ExtendedCatchUpSubscription, reason, error),
       ) as ExtendedCatchUpSubscription;
     } catch (err) {
       this.logger.error(err.message);
@@ -133,16 +155,13 @@ export class EventStoreBus {
       this.logger.log(`
       Connecting to persistent subscription ${subscriptionName} on stream ${stream}!
       `);
-      const resolved = await this.eventStore.connection.connectToPersistentSubscription(
+      const resolved = (await this.eventStore.connection.connectToPersistentSubscription(
         stream,
         subscriptionName,
         (sub, payload) => this.onEvent(sub, payload),
-        (sub, reason, error) => this.onDropped(
-          sub as ExtendedPersistentSubscription,
-          reason,
-          error,
-        ),
-      ) as ExtendedPersistentSubscription;
+        (sub, reason, error) =>
+          this.onDropped(sub as ExtendedPersistentSubscription, reason, error),
+      )) as ExtendedPersistentSubscription;
 
       resolved.isLive = true;
 
@@ -153,7 +172,9 @@ export class EventStoreBus {
   }
 
   async onEvent(
-    _subscription: EventStorePersistentSubscription | EventStoreCatchUpSubscription,
+    _subscription:
+      | EventStorePersistentSubscription
+      | EventStoreCatchUpSubscription,
     payload: ResolvedEvent,
   ) {
     const { event } = payload;

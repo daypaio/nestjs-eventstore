@@ -8,20 +8,14 @@ export interface EventStoreModuleOptions {
 }
 
 export interface EventStoreModuleAsyncOptions {
-  useFactory: (
-    ...args: any[]
-  ) => Promise<any> | any;
+  useFactory: (...args: any[]) => Promise<any> | any;
   inject?: any[];
 }
 
 @Global()
 @Module({
-  providers: [
-    EventStore,
-  ],
-  exports: [
-    EventStore,
-  ],
+  providers: [EventStore],
+  exports: [EventStore],
 })
 export class EventStoreModule {
   static forRoot(
@@ -38,9 +32,7 @@ export class EventStoreModule {
           },
         },
       ],
-      exports: [
-        EventStore,
-      ],
+      exports: [EventStore],
     };
   }
 
@@ -51,15 +43,15 @@ export class EventStoreModule {
         {
           provide: EventStore,
           useFactory: async (...args) => {
-            const { connectionSettings, endpoint } = await options.useFactory(...args);
+            const { connectionSettings, endpoint } = await options.useFactory(
+              ...args,
+            );
             return new EventStore(connectionSettings, endpoint);
           },
           inject: options.inject,
         },
       ],
-      exports: [
-        EventStore,
-      ],
+      exports: [EventStore],
     };
   }
 }

@@ -11,7 +11,10 @@ import {
   InvalidSagaException,
   ISaga,
 } from '@nestjs/cqrs';
-import { SAGA_METADATA, EVENTS_HANDLER_METADATA } from '@nestjs/cqrs/dist/decorators/constants';
+import {
+  SAGA_METADATA,
+  EVENTS_HANDLER_METADATA,
+} from '@nestjs/cqrs/dist/decorators/constants';
 import { EventStoreBus, IEventConstructors } from './event-store.bus';
 import { EventStore } from '../event-store.class';
 import { CqrsOptions } from '@nestjs/cqrs/dist/interfaces/cqrs-options.interface';
@@ -22,26 +25,27 @@ export enum EventStoreSubscriptionType {
 }
 
 export type EventStorePersistentSubscription = {
-  type: EventStoreSubscriptionType.Persistent,
-  stream: string,
-  persistentSubscriptionName: string,
+  type: EventStoreSubscriptionType.Persistent;
+  stream: string;
+  persistentSubscriptionName: string;
 };
 
 export type EventStoreCatchupSubscription = {
-  type: EventStoreSubscriptionType.CatchUp,
-  stream: string,
+  type: EventStoreSubscriptionType.CatchUp;
+  stream: string;
 };
 
 export type EventStoreSubscriptionConfig = {
-  persistentSubscriptionName: string,
+  persistentSubscriptionName: string;
 };
 
 export type EventStoreSubscription =
-  EventStorePersistentSubscription | EventStoreCatchupSubscription;
+  | EventStorePersistentSubscription
+  | EventStoreCatchupSubscription;
 
 export type EventStoreBusConfig = {
-  subscriptions: EventStoreSubscription[],
-  eventInstantiators: IEventConstructors,
+  subscriptions: EventStoreSubscription[];
+  eventInstantiators: IEventConstructors;
 };
 
 export type EventHandlerType = Type<IEventHandler<IEvent>>;
@@ -152,7 +156,11 @@ export class EventBusProvider extends ObservableBus<IEvent>
   }
 
   private useDefaultPublisher() {
-    const pubSub = new EventStoreBus(this.eventStore, this.subject$, this.config);
+    const pubSub = new EventStoreBus(
+      this.eventStore,
+      this.subject$,
+      this.config,
+    );
     this._publisher = pubSub;
   }
 }

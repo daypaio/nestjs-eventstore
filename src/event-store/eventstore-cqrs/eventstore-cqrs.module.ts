@@ -4,18 +4,20 @@ import { EventBusProvider, EventStoreBusConfig } from './event-bus.provider';
 import { EventStore } from '../event-store.class';
 import { ExplorerService } from '@nestjs/cqrs/dist/services/explorer.service';
 import { ModuleRef } from '@nestjs/core';
-import { EventStoreModule, EventStoreModuleAsyncOptions } from '../event-store.module';
+import {
+  EventStoreModule,
+  EventStoreModuleAsyncOptions,
+} from '../event-store.module';
 
 @Global()
 @Module({})
 export class EventStoreCqrsModule {
-
   constructor(
     private readonly explorerService: ExplorerService,
     private readonly eventsBus: EventBus,
     private readonly commandsBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) { }
+  ) {}
 
   onModuleInit() {
     const { events, queries, sagas, commands } = this.explorerService.explore();
@@ -32,9 +34,7 @@ export class EventStoreCqrsModule {
   ): DynamicModule {
     return {
       module: EventStoreCqrsModule,
-      imports: [
-        EventStoreModule.forRootAsync(options),
-      ],
+      imports: [EventStoreModule.forRootAsync(options)],
       providers: [
         CommandBus,
         QueryBus,
@@ -42,7 +42,12 @@ export class EventStoreCqrsModule {
         {
           provide: EventBus,
           useFactory: (commandBus, moduleRef, eventStore) => {
-            return new EventBusProvider(commandBus, moduleRef, eventStore, eventStoreBusConfig);
+            return new EventBusProvider(
+              commandBus,
+              moduleRef,
+              eventStore,
+              eventStoreBusConfig,
+            );
           },
           inject: [CommandBus, ModuleRef, EventStore],
         },
