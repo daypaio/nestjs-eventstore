@@ -1,5 +1,5 @@
 import { IEvent } from '@nestjs/cqrs';
 
-export interface IAggregate extends IEvent {
+export interface IAggregateEvent extends IEvent {
   streamName: string;
 }
