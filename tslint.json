@@ -12,10 +12,6 @@
     "linebreak-style": [
       true,
       "LF"
-    ],
-    "arrow-parens": [
-      "error",
-      "as-needed"
     ]
   },
   "rulesDirectory": []

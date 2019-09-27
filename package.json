@@ -1,6 +1,6 @@
 {
   "name": "nestjs-eventstore",
-  "version": "1.4.7",
+  "version": "1.4.8",
   "description": "Event Store connector for Nest js",
   "author": "Taimoor Alam <taimoor.alam@daypaio.com>",
   "license": "MIT",
@@ -17,7 +17,7 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json -c tslint.json",
     "lint:fix": "tslint -p tsconfig.json -c tslint.json --fix",
-    "check-lite": "npm run format && npm run lint:fix && npm prepare",
+    "check-lite": "npm run lint:fix && npm run prepare",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
