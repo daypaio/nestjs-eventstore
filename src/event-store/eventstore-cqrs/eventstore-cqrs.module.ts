@@ -8,6 +8,7 @@ import {
   EventStoreModule,
   EventStoreModuleAsyncOptions,
 } from '../event-store.module';
+import { EventPublisher } from './event-publisher';
 
 @Global()
 @Module({})
@@ -17,7 +18,7 @@ export class EventStoreCqrsModule {
     private readonly eventsBus: EventBus,
     private readonly commandsBus: CommandBus,
     private readonly queryBus: QueryBus,
-  ) {}
+  ) { }
 
   onModuleInit() {
     const { events, queries, sagas, commands } = this.explorerService.explore();
@@ -38,6 +39,7 @@ export class EventStoreCqrsModule {
       providers: [
         CommandBus,
         QueryBus,
+        EventPublisher,
         ExplorerService,
         {
           provide: EventBus,
