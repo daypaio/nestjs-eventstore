@@ -65,7 +65,7 @@ export class EventStoreCqrsModule {
         CommandBus,
         QueryBus,
         ExplorerService,
-        EventPublisher
+        EventPublisher,
       ],
     };
   }
