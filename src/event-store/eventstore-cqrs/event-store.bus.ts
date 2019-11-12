@@ -197,7 +197,7 @@ export class EventStoreBus {
     error: Error,
   ) {
     subscription.isLive = false;
-    this.logger.error(error);
+    this.logger.error(error.message, error.stack);
   }
 
   onLiveProcessingStarted(subscription: ExtendedCatchUpSubscription) {
