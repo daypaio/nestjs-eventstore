@@ -123,7 +123,7 @@ export class EventStoreBus {
     try {
       await this.eventStore.connection.appendToStream(stream, -2, [payload]);
     } catch (err) {
-      this.logger.error(err);
+      this.logger.error(err.message, err.stack);
     }
   }
 
@@ -143,7 +143,7 @@ export class EventStoreBus {
           this.onDropped(sub as ExtendedCatchUpSubscription, reason, error),
       ) as ExtendedCatchUpSubscription;
     } catch (err) {
-      this.logger.error(err.message);
+      this.logger.error(err.message, err.stack);
     }
   }
 
@@ -167,7 +167,7 @@ export class EventStoreBus {
 
       return resolved;
     } catch (err) {
-      this.logger.error(err.message);
+      this.logger.error(err.message, err.stack);
     }
   }
 
