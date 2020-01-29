@@ -98,7 +98,7 @@ export class EventBusProvider extends ObservableBus<IEvent>
       // We've received an observable here
       // let's send feedback
       // TODO see how to normalize handler
-      run$.flatMap((event)=> defer(() => handler.handle(event)));
+      run$.next((event)=> defer(() => handler.handle(event)));
     });
     this.subscriptions.push(subscription);
   }

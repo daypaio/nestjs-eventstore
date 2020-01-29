@@ -1,5 +1,5 @@
 import { IEvent } from '@nestjs/cqrs';
-import { Observable, of, ReplaySubject, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import {
   EventData,
   createEventData,
@@ -204,7 +204,7 @@ export class EventStoreBus {
 
     // build the event
     // Send an observable to get feedback only
-    const run$ = of( this.eventConstructors[event.eventType](
+    const run$ = new BehaviorSubject( this.eventConstructors[event.eventType](
       data, metadata, event.eventId, event.eventStreamId, event.eventNumber,
       new Date(event.created),
     ));
@@ -231,7 +231,8 @@ export class EventStoreBus {
         this.logger.error
       )
     }
-    this.subject$.next(await run$.toPromise());
+    // Are we putting shit in nestjs pluming ?
+    this.subject$.next(run$);
   }
 
   onDropped(
