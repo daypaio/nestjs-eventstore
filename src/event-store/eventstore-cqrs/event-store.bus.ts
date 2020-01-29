@@ -5,7 +5,7 @@ import {
   createEventData,
   EventStorePersistentSubscription,
   ResolvedEvent,
-  EventStoreCatchUpSubscription,
+  EventStoreCatchUpSubscription, PersistentSubscriptionNakEventAction,
 } from 'node-eventstore-client';
 import { v4 } from 'uuid';
 import { Logger } from '@nestjs/common';
@@ -203,7 +203,7 @@ export class EventStoreBus {
     const metadata = JSON.parse(event.metadata.toString());
 
     // build the event
-    // Send an observable to get feedback only
+    // Send it to a subject that send its value on subscribe
     const run$ = new BehaviorSubject( this.eventConstructors[event.eventType](
       data, metadata, event.eventId, event.eventStreamId, event.eventNumber,
       new Date(event.created),
@@ -215,7 +215,8 @@ export class EventStoreBus {
         error => {
           _subscription.fail(
             event,
-            action, // TODO action park ?
+            // TODO see how to configure this
+            PersistentSubscriptionNakEventAction.Retry,
             error.message
           );
         },
@@ -225,13 +226,15 @@ export class EventStoreBus {
       );
     }
     else {
-      // Log
+      // Or log if their is nothing to do
       run$.subscribe(
         this.logger.debug,
         this.logger.error
       )
     }
-    // Are we putting shit in nestjs pluming ?
+    // Send to the handler on provider
+    // Are we putting shit in nestjs plumbing ?
+    // It's a global subject it can't complete
     this.subject$.next(run$);
   }
 

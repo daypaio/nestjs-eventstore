@@ -95,10 +95,16 @@ export class EventBusProvider extends ObservableBus<IEvent>
     // TODO
     // Global stream for nestjs plumbing
     const subscription = stream$.subscribe(run$ => {
-      // We've received an observable here
-      // let's send feedback
-      // TODO see how to normalize handler
-      run$.next((event)=> defer(() => handler.handle(event)));
+      // We've received a subject here
+      // with the event inside
+      run$.subscribe((event)=> {
+        // let's handle
+        // TODO see how to normalize handler return
+        defer(() => handler.handle(event))
+          // Send back to the subject
+          // link complete
+          .subscribe(run$);
+      });
     });
     this.subscriptions.push(subscription);
   }
