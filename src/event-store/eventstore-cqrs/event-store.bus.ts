@@ -231,7 +231,7 @@ export class EventStoreBus {
         this.logger.error
       )
     }
-    this.subject$.next(run$);
+    this.subject$.next(await run$.toPromise());
   }
 
   onDropped(
