@@ -1,5 +1,5 @@
 import { IEvent } from '@nestjs/cqrs';
-import { Subject } from 'rxjs';
+import { Observable, of, ReplaySubject, Subject } from 'rxjs';
 import {
   EventData,
   createEventData,
@@ -30,8 +30,20 @@ interface ExtendedPersistentSubscription
   isLive: boolean | undefined;
 }
 
+// Todo Define
+export class EventStoreEvent implements IEvent {
+  constructor(data, meta, eventId, eventStreamId, created, eventNumber) {
+
+  }
+}
+
+export class AcknowledgableEvent extends EventStoreEvent {
+
+
+}
+
 export class EventStoreBus {
-  private eventHandlers: IEventConstructors;
+  private eventConstructors: IEventConstructors;
   private logger = new Logger('EventStoreBus');
   private catchupSubscriptions: ExtendedCatchUpSubscription[] = [];
   private catchupSubscriptionsCount: number;
@@ -182,14 +194,44 @@ export class EventStoreBus {
       this.logger.error('Received event that could not be resolved!');
       return;
     }
-    const handler = this.eventHandlers[event.eventType];
-    if (!handler) {
+    const eventConstructor = this.eventConstructors[event.eventType];
+    if (!eventConstructor) {
       this.logger.error('Received event that could not be handled!');
       return;
     }
     const data = JSON.parse(event.data.toString());
     const metadata = JSON.parse(event.metadata.toString());
-    this.subject$.next(this.eventHandlers[event.eventType](data, metadata, event.eventId, event.eventStreamId, new Date(event.created)));
+
+    // build the event
+    // Send an observable to get feedback only
+    const run$ = of( this.eventConstructors[event.eventType](
+      data, metadata, event.eventId, event.eventStreamId, event.eventNumber,
+      new Date(event.created),
+    ));
+
+    // subscribe to the feedback
+    if (_subscription instanceof EventStorePersistentSubscription) {
+      run$.subscribe(null,
+        error => {
+          _subscription.fail(
+            event,
+            action, // TODO action park ?
+            error.message
+          );
+        },
+        () => {
+          _subscription.acknowledge(event);
+        },
+      );
+    }
+    else {
+      // Log
+      run$.subscribe(
+        this.logger.debug,
+        this.logger.error
+      )
+    }
+    this.subject$.next(run$);
   }
 
   onDropped(
@@ -207,6 +249,6 @@ export class EventStoreBus {
   }
 
   addEventHandlers(eventHandlers: IEventConstructors) {
-    this.eventHandlers = { ...this.eventHandlers, ...eventHandlers };
+    this.eventConstructors = { ...this.eventConstructors, ...eventHandlers };
   }
 }

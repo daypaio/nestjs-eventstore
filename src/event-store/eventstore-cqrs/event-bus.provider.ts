@@ -1,6 +1,6 @@
 import { Injectable, OnModuleDestroy, Type } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
-import { Observable, Subscription } from 'rxjs';
+import { defer, Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { isFunction } from 'util';
 import {
@@ -15,7 +15,7 @@ import {
   SAGA_METADATA,
   EVENTS_HANDLER_METADATA,
 } from '@nestjs/cqrs/dist/decorators/constants';
-import { EventStoreBus, IEventConstructors } from './event-store.bus';
+import { EventStoreBus, EventStoreEvent, IEventConstructors } from './event-store.bus';
 import { EventStore } from '../event-store.class';
 import { CqrsOptions } from '@nestjs/cqrs/dist/interfaces/cqrs-options.interface';
 
@@ -88,9 +88,18 @@ export class EventBusProvider extends ObservableBus<IEvent>
     (events || []).forEach(event => this._publisher.publish(event));
   }
 
-  bind(handler: IEventHandler<IEvent>, name: string) {
+  // Todo
+  bind(handler: IEventHandler<EventStoreEvent>, name: string) {
     const stream$ = name ? this.ofEventName(name) : this.subject$;
-    const subscription = stream$.subscribe(event => handler.handle(event));
+
+    // TODO
+    // Global stream for nestjs plumbing
+    const subscription = stream$.subscribe(run$ => {
+      // We've received an observable here
+      // let's send feedback
+      // TODO see how to normalize handler
+      run$.flatMap((event)=> defer(() => handler.handle(event)));
+    });
     this.subscriptions.push(subscription);
   }
 
