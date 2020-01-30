@@ -37,8 +37,19 @@ export class EventStoreEvent implements IEvent {
   }
 }
 
-export class AcknowledgableEvent extends EventStoreEvent {
-
+export class AcknowledgableEventstoreEvent extends EventStoreEvent {
+  private subscription:EventStorePersistentSubscription;
+  private event:ResolvedEvent;
+  setSubscription(sub:EventStorePersistentSubscription, event:ResolvedEvent) {
+    this.subscription =sub;
+    this.event = event;
+  }
+  ack() {
+    this.subscription.acknowledge(this.event);
+  }
+  nack(action:PersistentSubscriptionNakEventAction, reason:string) {
+    this.subscription.fail(this.event, action, reason);
+  }
 
 }
 
@@ -210,41 +221,16 @@ export class EventStoreBus {
     - build acknowledgeable events, pass them the subscription and let the handler do the hack
       drawback : the subscription pass on the events
      */
+    //const builtEvent = this.eventFactory.build(event.eventType, event);
 
-    // build the event
-    // Send it to a subject that send its value on subscribe
-    const run$ = new BehaviorSubject( this.eventConstructors[event.eventType](
+    const builtEvent = eventConstructor(
       data, metadata, event.eventId, event.eventStreamId, event.eventNumber,
       new Date(event.created),
-    ));
-
-    // subscribe to the feedback
-    if (_subscription instanceof EventStorePersistentSubscription) {
-      run$.subscribe(null,
-        error => {
-          _subscription.fail(
-            event,
-            // TODO see how to configure this
-            PersistentSubscriptionNakEventAction.Retry,
-            error.message
-          );
-        },
-        () => {
-          _subscription.acknowledge(event);
-        },
-      );
+    );
+    if(builtEvent instanceof AcknowledgableEventstoreEvent) {
+      builtEvent.setSubscription(_subscription, event);
     }
-    else {
-      // Or log if their is nothing to do
-      run$.subscribe(
-        this.logger.debug,
-        this.logger.error
-      )
-    }
-    // Send to the handler on provider
-    // Are we putting shit in nestjs plumbing ?
-    // It's a global subject it can't complete
-    this.subject$.next(run$);
+    this.subject$.next(builtEvent);
   }
 
   onDropped(
