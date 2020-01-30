@@ -103,7 +103,7 @@ export class EventBusProvider extends ObservableBus<IEvent>
         defer(() => handler.handle(event))
           // Send back to the subject
           // link complete
-          .subscribe(run$);
+          .subscribe(null, run$.error, run$.complete);
       });
     });
     this.subscriptions.push(subscription);

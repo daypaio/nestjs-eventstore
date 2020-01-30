@@ -194,6 +194,7 @@ export class EventStoreBus {
       this.logger.error('Received event that could not be resolved!');
       return;
     }
+    // TODO use a factory to avoid manual declaration ?
     const eventConstructor = this.eventConstructors[event.eventType];
     if (!eventConstructor) {
       this.logger.error('Received event that could not be handled!');
@@ -201,6 +202,14 @@ export class EventStoreBus {
     }
     const data = JSON.parse(event.data.toString());
     const metadata = JSON.parse(event.metadata.toString());
+
+    /*
+    Two solutions :
+    - send an observable on the subject to follow handling
+      drawback : it's not what nest is attending
+    - build acknowledgeable events, pass them the subscription and let the handler do the hack
+      drawback : the subscription pass on the events
+     */
 
     // build the event
     // Send it to a subject that send its value on subscribe

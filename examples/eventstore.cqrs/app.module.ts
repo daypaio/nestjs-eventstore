@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { PersonsModule } from './persons/persons.module';
 import { ConfigModule, ConfigService } from 'nestjs-config';
 import * as path from 'path';
-import { EventStoreCqrsModule } from 'nestjs-eventstore';
+import { EventStoreCqrsModule } from '../../src/index';
 import { eventStoreBusConfig } from './event-bus.provider';
 
 @Module({

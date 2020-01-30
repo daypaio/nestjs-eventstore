@@ -1,7 +1,7 @@
 import {
   EventStoreBusConfig,
   EventStoreSubscriptionType,
-} from 'nestjs-eventstore';
+} from '../../src/index';
 
 export class PersonAddedEvent {
   constructor(
@@ -29,6 +29,7 @@ export const eventStoreBusConfig: EventStoreBusConfig = {
       persistentSubscriptionName: 'contacts',
     },
   ],
+  // TODO use a factory that search the events automatically
   eventInstantiators: {
     ...PersonEventInstantiators,
   },
