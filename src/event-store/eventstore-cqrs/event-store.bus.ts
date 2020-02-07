@@ -178,7 +178,7 @@ export class EventStoreBus {
     payload: ResolvedEvent,
   ) {
     const { event } = payload;
-    if (!payload.isResolved || !event || !event.isJson) {
+    if ((payload.link !== null && !payload.isResolved) || !event || !event.isJson) {
       this.logger.error('Received event that could not be resolved!');
       return;
     }
