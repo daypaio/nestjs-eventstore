@@ -127,6 +127,21 @@ export class EventStoreBus {
     }
   }
 
+  async publishAll(events: IEvent[], stream?: string) {
+    try {
+      await this.eventStore.connection.appendToStream(stream, -2, (events || []).map(
+        (event: IEvent) => createEventData(
+          v4(),
+          event.constructor.name,
+          true,
+          Buffer.from(JSON.stringify(event)),
+        ),
+      ));
+    } catch (err) {
+      this.logger.error(err);
+    }
+  }
+
   subscribeToCatchupSubscription(stream: string): ExtendedCatchUpSubscription {
     this.logger.log(`Catching up and subscribing to stream ${stream}!`);
     try {
