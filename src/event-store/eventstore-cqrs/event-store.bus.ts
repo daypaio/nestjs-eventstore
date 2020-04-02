@@ -142,7 +142,7 @@ export class EventStoreBus {
     }
   }
 
-  subscribeToCatchupSubscription(stream: string, startFrom: Number): ExtendedCatchUpSubscription {
+  subscribeToCatchupSubscription(stream: string, startFrom: number): ExtendedCatchUpSubscription {
     this.logger.log(`Catching up and subscribing to stream ${stream}!`);
     try {
       return this.eventStore.connection.subscribeToStreamFrom(
