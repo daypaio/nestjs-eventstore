@@ -33,7 +33,7 @@ export type EventStorePersistentSubscription = {
 export type EventStoreCatchupSubscription = {
   type: EventStoreSubscriptionType.CatchUp;
   stream: string;
-  startFrom: Number;
+  startFrom?: Number;
 };
 
 export type EventStoreSubscriptionConfig = {
