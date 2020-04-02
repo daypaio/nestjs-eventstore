@@ -80,7 +80,7 @@ export class EventStoreBus {
   subscribeToCatchUpSubscriptions(subscriptions: ESCatchUpSubscription[]) {
     this.catchupSubscriptionsCount = subscriptions.length;
     this.catchupSubscriptions = subscriptions.map((subscription) => {
-      return this.subscribeToCatchupSubscription(subscription.stream);
+      return this.subscribeToCatchupSubscription(subscription.stream, subscription.startFrom || 0);
     });
   }
 
@@ -142,12 +142,12 @@ export class EventStoreBus {
     }
   }
 
-  subscribeToCatchupSubscription(stream: string): ExtendedCatchUpSubscription {
+  subscribeToCatchupSubscription(stream: string, startFrom: Number): ExtendedCatchUpSubscription {
     this.logger.log(`Catching up and subscribing to stream ${stream}!`);
     try {
       return this.eventStore.connection.subscribeToStreamFrom(
         stream,
-        0,
+        startFrom,
         true,
         (sub, payload) => this.onEvent(sub, payload),
         subscription =>
