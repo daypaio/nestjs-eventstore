@@ -54,13 +54,14 @@ export class EventStoreBus {
       return sub.type === EventStoreSubscriptionType.Persistent;
     });
 
-    this.subscribeToCatchUpSubscriptions(
-      catchupSubscriptions as ESCatchUpSubscription[],
-    );
-
-    this.subscribeToPersistentSubscriptions(
-      persistentSubscriptions as ESPersistentSubscription[],
-    );
+    this.eventStore.connection.on('connected', () => {
+      this.subscribeToCatchUpSubscriptions(
+        catchupSubscriptions as ESCatchUpSubscription[],
+      );
+      this.subscribeToPersistentSubscriptions(
+        persistentSubscriptions as ESPersistentSubscription[],
+      );
+    });
   }
 
   async subscribeToPersistentSubscriptions(
@@ -167,9 +168,7 @@ export class EventStoreBus {
     subscriptionName: string,
   ): Promise<ExtendedPersistentSubscription> {
     try {
-      this.logger.log(`
-      Connecting to persistent subscription ${subscriptionName} on stream ${stream}!
-      `);
+      this.logger.log(`Connecting to persistent subscription ${subscriptionName} on stream ${stream}!`);
       const resolved = (await this.eventStore.connection.connectToPersistentSubscription(
         stream,
         subscriptionName,
@@ -182,7 +181,7 @@ export class EventStoreBus {
 
       return resolved;
     } catch (err) {
-      this.logger.error(err.message, err.stack);
+      this.logger.error(`[${stream}][${subscriptionName}] ${err.message}`, err.stack);
     }
   }
 
