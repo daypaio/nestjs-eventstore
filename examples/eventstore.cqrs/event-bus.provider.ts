@@ -1,25 +1,23 @@
 import {
-  EventStoreBusConfig,
+  AcknowledgableEventstoreEvent,
+  EventStoreBusConfig, EventStoreEvent,
   EventStoreSubscriptionType,
-} from 'nestjs-eventstore';
+} from '../../src/index';
 
-export class PersonAddedEvent {
-  constructor(
-    public _id: string,
-    public data: any,
-    public loggedInUserId: string,
-  ) { }
+export class PersonAddedEvent extends AcknowledgableEventstoreEvent {
 
-  get streamName() {
-    // this is the stream name to which the event will be pushed.
-    return `persons-${this._id}`;
-  }
 }
 
 const PersonEventInstantiators = {
-  PersonAddedEvent: (_id, data, loggedInUserId) =>
-    new PersonAddedEvent(_id, data, loggedInUserId),
+  PersonAddedEvent: (event:EventStoreEvent) =>
+    new PersonAddedEvent(event.data, event.meta),
 };
+/*
+const eventBuilderFactory = (type, event) => {
+  const className = `${type}Event`;
+  return new className(event);
+};
+*/
 
 export const eventStoreBusConfig: EventStoreBusConfig = {
   subscriptions: [
@@ -29,6 +27,7 @@ export const eventStoreBusConfig: EventStoreBusConfig = {
       persistentSubscriptionName: 'contacts',
     },
   ],
+  // TODO use a factory that search the events automatically
   eventInstantiators: {
     ...PersonEventInstantiators,
   },

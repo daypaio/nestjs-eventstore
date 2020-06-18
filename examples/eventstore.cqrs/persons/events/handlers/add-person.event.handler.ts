@@ -13,10 +13,12 @@ export class AddPersonEventHandler implements IEventHandler<PersonAddedEvent> {
     const { _id, data } = event;
     try {
       await this.repository.create(data);
+      event.ack();
     } catch (error) {
       this.logger.error(`Failed to create person of id ${_id}`);
       this.logger.log(error.message);
       this.logger.debug(error.stack);
+      event.nack()
     }
   }
 }

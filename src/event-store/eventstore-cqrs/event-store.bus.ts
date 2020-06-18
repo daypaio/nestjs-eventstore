@@ -1,11 +1,11 @@
 import { IEvent } from '@nestjs/cqrs';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import {
   EventData,
   createEventData,
   EventStorePersistentSubscription,
   ResolvedEvent,
-  EventStoreCatchUpSubscription,
+  EventStoreCatchUpSubscription, PersistentSubscriptionNakEventAction,
 } from 'node-eventstore-client';
 import { v4 } from 'uuid';
 import { Logger } from '@nestjs/common';
@@ -30,8 +30,31 @@ interface ExtendedPersistentSubscription
   isLive: boolean | undefined;
 }
 
+// Todo Define
+export class EventStoreEvent implements IEvent {
+  constructor(data, meta, eventId, eventStreamId, created, eventNumber) {
+
+  }
+}
+
+export class AcknowledgableEventstoreEvent extends EventStoreEvent {
+  private subscription:EventStorePersistentSubscription;
+  private event:ResolvedEvent;
+  setSubscription(sub:EventStorePersistentSubscription, event:ResolvedEvent) {
+    this.subscription =sub;
+    this.event = event;
+  }
+  ack() {
+    this.subscription.acknowledge(this.event);
+  }
+  nack(action:PersistentSubscriptionNakEventAction, reason:string) {
+    this.subscription.fail(this.event, action, reason);
+  }
+
+}
+
 export class EventStoreBus {
-  private eventHandlers: IEventConstructors;
+  private eventConstructors: IEventConstructors;
   private logger = new Logger('EventStoreBus');
   private catchupSubscriptions: ExtendedCatchUpSubscription[] = [];
   private catchupSubscriptionsCount: number;
@@ -194,13 +217,32 @@ export class EventStoreBus {
       this.logger.error('Received event that could not be resolved!');
       return;
     }
-    const handler = this.eventHandlers[event.eventType];
-    if (!handler) {
+    // TODO use a factory to avoid manual declaration ?
+    const eventConstructor = this.eventConstructors[event.eventType];
+    if (!eventConstructor) {
       this.logger.error('Received event that could not be handled!');
       return;
     }
-    const data = Object.values(JSON.parse(event.data.toString()));
-    this.subject$.next(this.eventHandlers[event.eventType](...data));
+    const data = JSON.parse(event.data.toString());
+    const metadata = JSON.parse(event.metadata.toString());
+
+    /*
+    Two solutions :
+    - send an observable on the subject to follow handling
+      drawback : it's not what nest is attending
+    - build acknowledgeable events, pass them the subscription and let the handler do the hack
+      drawback : the subscription pass on the events
+     */
+    //const builtEvent = this.eventFactory.build(event.eventType, event);
+
+    const builtEvent = eventConstructor(
+      data, metadata, event.eventId, event.eventStreamId, event.eventNumber,
+      new Date(event.created),
+    );
+    if(builtEvent instanceof AcknowledgableEventstoreEvent) {
+      builtEvent.setSubscription(_subscription, event);
+    }
+    this.subject$.next(builtEvent);
   }
 
   onDropped(
@@ -239,6 +281,6 @@ export class EventStoreBus {
   }
 
   addEventHandlers(eventHandlers: IEventConstructors) {
-    this.eventHandlers = { ...this.eventHandlers, ...eventHandlers };
+    this.eventConstructors = { ...this.eventConstructors, ...eventHandlers };
   }
 }
