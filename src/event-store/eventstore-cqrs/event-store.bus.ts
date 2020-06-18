@@ -179,7 +179,7 @@ export class EventStoreBus {
       return resolved;
     } catch (err) {
       this.logger.error(`[${stream}][${subscriptionName}] ${err.message}`, err.stack);
-      this.reSubscribeToPersistentSubscription(stream, subscriptionName)
+      this.reSubscribeToPersistentSubscription(stream, subscriptionName);
     }
   }
 
@@ -210,16 +210,27 @@ export class EventStoreBus {
   ) {
     subscription.isLive = false;
     this.logger.error(error.message, error.stack);
-    if((subscription as any)._subscriptionId!=undefined)
-      this.reSubscribeToPersistentSubscription((subscription as any)._streamId,(subscription as any)._subscriptionId)
+    if ((subscription as any)._subscriptionId !== undefined) {
+      this.reSubscribeToPersistentSubscription(
+        (subscription as any)._streamId,
+        (subscription as any)._subscriptionId,
+      );
+    }
   }
 
   reSubscribeToPersistentSubscription(
     stream: string,
     subscriptionName: string,
-  ){
+  ) {
     this.logger.warn(`connecting to subscription ${subscriptionName} ${stream}. Retrying...`);
-    setTimeout((stream, subscriptionName) => this.subscribeToPersistentSubscription(stream, subscriptionName), 3000, stream, subscriptionName);
+    setTimeout(
+      (stream, subscriptionName) => this.subscribeToPersistentSubscription(
+        stream, subscriptionName,
+      ),
+      3000,
+      stream,
+      subscriptionName,
+    );
   }
 
   onLiveProcessingStarted(subscription: ExtendedCatchUpSubscription) {
