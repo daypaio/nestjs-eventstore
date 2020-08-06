@@ -6,6 +6,7 @@ import {
   EventStorePersistentSubscription,
   ResolvedEvent,
   EventStoreCatchUpSubscription,
+  PersistentSubscriptionSettings,
 } from 'node-eventstore-client';
 import { v4 } from 'uuid';
 import { Logger } from '@nestjs/common';
@@ -16,6 +17,8 @@ import {
   EventStorePersistentSubscription as ESPersistentSubscription,
   EventStoreCatchupSubscription as ESCatchUpSubscription,
 } from './event-bus.provider';
+
+export type Instantiable<T = any> = {new(...args: any[]): T};
 
 export interface IEventConstructors {
   [key: string]: (...args: any[]) => IEvent;
@@ -44,7 +47,7 @@ export class EventStoreBus {
     private subject$: Subject<IEvent>,
     config: EventStoreBusConfig,
   ) {
-    this.addEventHandlers(config.eventInstantiators);
+    this.addEventHandlers(config.events);
 
     const catchupSubscriptions = config.subscriptions.filter((sub) => {
       return sub.type === EventStoreSubscriptionType.CatchUp;
@@ -73,6 +76,27 @@ export class EventStoreBus {
           subscription.stream,
           subscription.persistentSubscriptionName,
         );
+      }),
+    );
+  }
+
+  async createMissingPersistentSubscriptions(
+    subscriptions: ESPersistentSubscription[],
+  ) {
+    const settings: PersistentSubscriptionSettings = PersistentSubscriptionSettings.create();
+    settings['resolveLinkTos'] = true;
+
+    await Promise.all(
+      subscriptions.map(async (subscription) => {
+        try {
+          return this.eventStore.getConnection().createPersistentSubscription(
+            subscription.stream,
+            subscription.persistentSubscriptionName,
+            settings,
+          );
+        } catch (error) {
+          this.logger.error(error);
+        }
       }),
     );
   }
@@ -238,7 +262,13 @@ export class EventStoreBus {
     this.logger.log('Live processing of EventStore events started!');
   }
 
-  addEventHandlers(eventHandlers: IEventConstructors) {
-    this.eventHandlers = { ...this.eventHandlers, ...eventHandlers };
+  addEventHandlers(eventHandlers: Instantiable<IEvent>[]) {
+    const instantiators: IEventConstructors = {};
+
+    eventHandlers.map((handler) => {
+      instantiators[handler.constructor.name] = (...data: any[]) => new handler(...data);
+    });
+
+    this.eventHandlers = { ...this.eventHandlers, ...instantiators };
   }
 }

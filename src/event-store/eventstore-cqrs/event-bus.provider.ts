@@ -15,7 +15,7 @@ import {
   SAGA_METADATA,
   EVENTS_HANDLER_METADATA,
 } from '@nestjs/cqrs/dist/decorators/constants';
-import { EventStoreBus, IEventConstructors } from './event-store.bus';
+import { EventStoreBus, Instantiable } from './event-store.bus';
 import { EventStore } from '../event-store.class';
 import { CqrsOptions } from '@nestjs/cqrs/dist/interfaces/cqrs-options.interface';
 
@@ -45,7 +45,7 @@ export type EventStoreSubscription =
 
 export type EventStoreBusConfig = {
   subscriptions: EventStoreSubscription[];
-  eventInstantiators: IEventConstructors;
+  events: Instantiable<IEvent>[];
 };
 
 export type EventHandlerType = Type<IEventHandler<IEvent>>;
