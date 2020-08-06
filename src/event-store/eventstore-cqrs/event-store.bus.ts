@@ -89,19 +89,20 @@ export class EventStoreBus {
     const settings: PersistentSubscriptionSettings = PersistentSubscriptionSettings.create();
     settings['resolveLinkTos'] = true;
 
-    await Promise.all(
-      subscriptions.map(async (subscription) => {
-        try {
+    try {
+      await Promise.all(
+        subscriptions.map(async (subscription) => {
           return this.eventStore.getConnection().createPersistentSubscription(
             subscription.stream,
             subscription.persistentSubscriptionName,
             settings,
-          );
-        } catch (error) {
-          this.logger.error(error);
-        }
-      }),
-    );
+          ).catch(error => this.logger.error(error));
+        }),
+      );
+    } catch(error) {
+      this.logger.error(error);
+    }
+    
   }
 
   subscribeToCatchUpSubscriptions(subscriptions: ESCatchUpSubscription[]) {
