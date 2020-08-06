@@ -99,10 +99,10 @@ export class EventStoreBus {
           ).catch(error => this.logger.error(error));
         }),
       );
-    } catch(error) {
+    } catch (error) {
       this.logger.error(error);
     }
-    
+
   }
 
   subscribeToCatchUpSubscriptions(subscriptions: ESCatchUpSubscription[]) {
