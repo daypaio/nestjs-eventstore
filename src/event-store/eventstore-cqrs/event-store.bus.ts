@@ -96,7 +96,12 @@ export class EventStoreBus {
             subscription.stream,
             subscription.persistentSubscriptionName,
             settings,
-          ).catch(error => this.logger.error(error));
+          )
+          .then(() => this.logger.log(
+            `Created persistent subscription -
+            ${subscription.persistentSubscriptionName}:${subscription.stream}`,
+          ))
+          .catch(() => {});
         }),
       );
     } catch (error) {
