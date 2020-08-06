@@ -70,6 +70,9 @@ export class EventStoreBus {
     subscriptions: ESPersistentSubscription[],
   ) {
     this.persistentSubscriptionsCount = subscriptions.length;
+    
+    await this.createMissingPersistentSubscriptions(subscriptions);
+
     this.persistentSubscriptions = await Promise.all(
       subscriptions.map(async (subscription) => {
         return await this.subscribeToPersistentSubscription(
