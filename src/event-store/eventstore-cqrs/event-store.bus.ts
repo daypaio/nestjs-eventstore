@@ -1,4 +1,4 @@
-import { IEvent } from '@nestjs/cqrs';
+import { IEvent, Constructor } from '@nestjs/cqrs';
 import { Subject } from 'rxjs';
 import {
   EventData,
@@ -18,10 +18,8 @@ import {
   EventStoreCatchupSubscription as ESCatchUpSubscription,
 } from './event-bus.provider';
 
-export type Instantiable<T = any> = {new(...args: any[]): T};
-
 export interface IEventConstructors {
-  [key: string]: (...args: any[]) => IEvent;
+  [key: string]: Constructor<IEvent>;
 }
 
 interface ExtendedCatchUpSubscription extends EventStoreCatchUpSubscription {
@@ -233,7 +231,7 @@ export class EventStoreBus {
       return;
     }
     const data = Object.values(JSON.parse(event.data.toString()));
-    this.subject$.next(this.eventHandlers[event.eventType](...data));
+    this.subject$.next(new this.eventHandlers[event.eventType](...data));
   }
 
   onDropped(
@@ -271,13 +269,7 @@ export class EventStoreBus {
     this.logger.log('Live processing of EventStore events started!');
   }
 
-  addEventHandlers(eventHandlers: Instantiable<IEvent>[]) {
-    const instantiators: IEventConstructors = {};
-
-    eventHandlers.map((handler) => {
-      instantiators[handler.constructor.name] = (...data: any[]) => new handler(...data);
-    });
-
-    this.eventHandlers = { ...this.eventHandlers, ...instantiators };
+  addEventHandlers(eventHandlers: IEventConstructors) {
+    this.eventHandlers = { ...this.eventHandlers, ...eventHandlers };
   }
 }
