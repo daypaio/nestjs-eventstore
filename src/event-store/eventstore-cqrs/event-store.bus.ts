@@ -7,6 +7,7 @@ import {
   ResolvedEvent,
   EventStoreCatchUpSubscription,
   PersistentSubscriptionSettings,
+  WriteResult,
 } from 'node-eventstore-client';
 import { v4 } from 'uuid';
 import { Logger } from '@nestjs/common';
@@ -143,7 +144,7 @@ export class EventStoreBus {
     );
   }
 
-  async publish(event: IEvent, stream?: string) {
+  publish(event: IEvent, stream?: string): Promise<WriteResult> {
     const payload: EventData = createEventData(
       v4(),
       event.constructor.name,
@@ -151,26 +152,18 @@ export class EventStoreBus {
       Buffer.from(JSON.stringify(event)),
     );
 
-    try {
-      await this.eventStore.getConnection().appendToStream(stream, -2, [payload]);
-    } catch (err) {
-      this.logger.error(err.message, err.stack);
-    }
+    return this.eventStore.getConnection().appendToStream(stream, -2, [payload]);
   }
 
-  async publishAll(events: IEvent[], stream?: string) {
-    try {
-      await this.eventStore.getConnection().appendToStream(stream, -2, (events || []).map(
-        (event: IEvent) => createEventData(
-          v4(),
-          event.constructor.name,
-          true,
-          Buffer.from(JSON.stringify(event)),
-        ),
-      ));
-    } catch (err) {
-      this.logger.error(err);
-    }
+  publishAll(events: IEvent[], stream?: string): Promise<WriteResult> {
+    return this.eventStore.getConnection().appendToStream(stream, -2, (events || []).map(
+      (event: IEvent) => createEventData(
+        v4(),
+        event.constructor.name,
+        true,
+        Buffer.from(JSON.stringify(event)),
+      ),
+    ));
   }
 
   subscribeToCatchupSubscription(stream: string): ExtendedCatchUpSubscription {
