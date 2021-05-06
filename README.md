@@ -37,8 +37,9 @@ import {
 } from 'nestjs-eventstore';
 
 //linking of events from EventStore to local events
-const EventInstantiators = [
-  SomeEvent: (_id: any, data: any, loggedInUserId: any) => new SomeEvent(_id, data, loggedInUserId);
+const events = [
+  //event name : event class (implements IEvent)
+  'SomeEvent': SomeEvent
 ];
 
 export const eventStoreBusConfig: EventStoreBusConfig = {
@@ -53,8 +54,8 @@ export const eventStoreBusConfig: EventStoreBusConfig = {
       stream: '$ce-users',
     },
   ],
-  eventInstantiators: {
-    ...EventInstantiators
+  events: {
+    ...events
   },
 };
 
