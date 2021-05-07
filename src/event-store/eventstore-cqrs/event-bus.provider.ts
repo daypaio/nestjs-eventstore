@@ -18,6 +18,7 @@ import {
 import { EventStoreBus, IEventConstructors } from './event-store.bus';
 import { EventStore } from '../event-store.class';
 import { CqrsOptions } from '@nestjs/cqrs/dist/interfaces/cqrs-options.interface';
+import { PersistentSubscriptionSettings } from 'node-eventstore-client';
 
 export enum EventStoreSubscriptionType {
   Persistent,
@@ -28,6 +29,7 @@ export type EventStorePersistentSubscription = {
   type: EventStoreSubscriptionType.Persistent;
   stream: string;
   persistentSubscriptionName: string;
+  settings?: PersistentSubscriptionSettings;
 };
 
 export type EventStoreCatchupSubscription = {

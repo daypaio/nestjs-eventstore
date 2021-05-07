@@ -60,7 +60,7 @@ export class EventStoreBus {
     );
 
     this.subscribeToPersistentSubscriptions(
-      persistentSubscriptions as ESPersistentSubscription[],
+      persistentSubscriptions as ESPersistentSubscription[]
     );
   }
 
@@ -68,7 +68,7 @@ export class EventStoreBus {
     subscriptions: ESPersistentSubscription[],
   ) {
     this.persistentSubscriptionsCount = subscriptions.length;
-
+    
     await this.createMissingPersistentSubscriptions(subscriptions);
 
     this.persistentSubscriptions = await Promise.all(
@@ -84,12 +84,13 @@ export class EventStoreBus {
   async createMissingPersistentSubscriptions(
     subscriptions: ESPersistentSubscription[],
   ) {
-    const settings: PersistentSubscriptionSettings = PersistentSubscriptionSettings.create();
-    settings['resolveLinkTos'] = true;
-
+    const defaultSettings = PersistentSubscriptionSettings.create();
+    defaultSettings['resolveLinkTos'] = true;
     try {
       await Promise.all(
         subscriptions.map(async (subscription) => {
+          let settings = subscription.settings ? subscription.settings :defaultSettings;
+          
           return this.eventStore.getConnection().createPersistentSubscription(
             subscription.stream,
             subscription.persistentSubscriptionName,
@@ -99,7 +100,7 @@ export class EventStoreBus {
             `Created persistent subscription -
             ${subscription.persistentSubscriptionName}:${subscription.stream}`,
           ))
-          .catch(() => {});
+          .catch(() => {this.logger.verbose(`No need to create ${subscription.persistentSubscriptionName} as it already exists.`)});
         }),
       );
     } catch (error) {
