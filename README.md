@@ -24,7 +24,7 @@ Injects eventstore connector modules, components, bus and eventstore config into
 #### Using the EventStoreCqrsModule
 
 `EventStoreCqrsModule` uses `@nestjs/cqrs` module under the hood. It overrides the default eventbus of `@nestjs/cqrs` and pushes the event to the eventstore rather than the internal eventBus.
-Therefore the `eventBus.publish(event, streamName)` method takes [two arguments instead of one](https://github.com/daypaio/nestjs-eventstore/blob/2e09dd435c60a1a881b9b012d6c83f810b3c85da/src/event-store/eventstore-cqrs/event-store.bus.ts#L115). The first one is the event itself, and the second one is the stream name. 
+Therefore the `eventBus.publish(event, streamName)` method takes [two arguments instead of one](https://github.com/daypaio/nestjs-eventstore/blob/2e09dd435c60a1a881b9b012d6c83f810b3c85da/src/event-store/eventstore-cqrs/event-store.bus.ts#L115). The first one is the event itself, and the second one is the stream name.
 
 Once the event is pushed to the eventStore all the subscriptions listening to that event are pushed that event from the event store. Event handlers can then be triggered to cater for those events.
 
@@ -51,6 +51,7 @@ export const eventStoreBusConfig: EventStoreBusConfig = {
     { // Catchup subscription
       type: EventStoreSubscriptionType.CatchUp,
       stream: '$ce-users',
+      startFrom: 0,
     },
   ],
   eventInstantiators: {
