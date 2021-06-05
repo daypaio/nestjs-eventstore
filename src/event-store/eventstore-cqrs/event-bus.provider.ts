@@ -81,11 +81,11 @@ export class EventBusProvider extends ObservableBus<IEvent>
   }
 
   publish<T extends IEvent>(event: T, stream: string) {
-    this._publisher.publish(event, stream);
+    return this._publisher.publish(event, stream);
   }
 
   publishAll(events: IEvent[]) {
-    (events || []).forEach(event => this._publisher.publish(event));
+    return Promise.all((events || []).map(event => this._publisher.publish(event)));
   }
 
   bind(handler: IEventHandler<IEvent>, name: string) {
