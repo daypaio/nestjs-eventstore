@@ -19,7 +19,7 @@ import {
 } from './event-bus.provider';
 
 export interface IEventConstructors {
-  [key: string]: Constructor<IEvent>;
+  [key: string]: new (...args: any[]) => IEvent;
 }
 
 interface ExtendedCatchUpSubscription extends EventStoreCatchUpSubscription {
