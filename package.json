@@ -39,15 +39,15 @@
   },
   "dependencies": {
     "@nestjs/common": "^7.6.17",
-    "@nestjs/core": "^7.6.17",
+    "@nestjs/core": "^9.2.1",
     "@nestjs/cqrs": "^7.0.1",
     "node-eventstore-client": "^0.2.18",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^6.3.3"
   },
   "devDependencies": {
-    "@nestjs/platform-express": "^7.6.17",
-    "@nestjs/testing": "^7.6.17",
+    "@nestjs/platform-express": "^9.2.1",
+    "@nestjs/testing": "^9.2.1",
     "@types/express": "^4.17.12",
     "@types/jest": "^26.0.23",
     "@types/node": "^15.9.0",
