@@ -53,7 +53,7 @@ export const eventStoreBusConfig: EventStoreBusConfig = {
       stream: '$ce-users',
     },
   ],
-  eventInstantiators: {
+  events: {
     ...EventInstantiators
   },
 };
