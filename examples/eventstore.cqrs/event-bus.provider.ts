@@ -17,8 +17,7 @@ export class PersonAddedEvent {
 }
 
 const PersonEventInstantiators = {
-  PersonAddedEvent: (_id, data, loggedInUserId) =>
-    new PersonAddedEvent(_id, data, loggedInUserId),
+  PersonAddedEvent
 };
 
 export const eventStoreBusConfig: EventStoreBusConfig = {
@@ -29,7 +28,7 @@ export const eventStoreBusConfig: EventStoreBusConfig = {
       persistentSubscriptionName: 'contacts',
     },
   ],
-  eventInstantiators: {
+  events: {
     ...PersonEventInstantiators,
   },
 };
